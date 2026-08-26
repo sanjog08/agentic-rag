@@ -6,6 +6,8 @@ def add_resources():
     )
     from app import api
 
+    api.add_resource(healthCheck.DefaultRoute, '/')
+
     api.add_resource(healthCheck.HealthCheck, '/health-check')
 
     api.add_resource(loginSignup.UserRegister, '/register')

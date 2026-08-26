@@ -5,4 +5,5 @@ app.debug = True
 
 routes.add_resources()
 
-app.run()
+if __name__ == '__main__':
+    app.run()
