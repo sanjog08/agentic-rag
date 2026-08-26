@@ -20,3 +20,4 @@ langgraph-checkpoint
 
 pydantic
 dotenv
+PyJWT
