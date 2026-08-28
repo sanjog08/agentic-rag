@@ -11,13 +11,15 @@ logger = logging.getLogger(__name__)
 
 class SendMessage(Resource):
 
-    def post(self):
+    @authenticate()
+    @exception_handler()
+    def post(self, **kwargs):
         try:
             json_data = request.get_json(force=True)
             thread_id = json_data.get('thread_id')
             message = json_data.get('human_message')
 
-            thread_id, get_chatbot_ans = self.send_message_to_bot(message, thread_id)
+            thread_id, get_chatbot_ans = self.send_message_to_bot(message, thread_id, **kwargs)
             data = {"thread_id": thread_id, "bot_reply": get_chatbot_ans}
 
             return responsify(body= data)
@@ -25,7 +27,8 @@ class SendMessage(Resource):
             raise e
 
     @classmethod
-    def send_message_to_bot(cls, message, thread_id=None):
+    @exception_handler()
+    def send_message_to_bot(cls, message, thread_id=None, **kwargs):
 
         user_id = "user-vip"
 
