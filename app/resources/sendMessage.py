@@ -30,7 +30,7 @@ class SendMessage(Resource):
     @exception_handler()
     def send_message_to_bot(cls, message, thread_id=None, **kwargs):
 
-        user_id = "user-vip"
+        user_id = kwargs.get('user_id')
 
         if not message:
             return responsify(has_error= True, errors= "message is required.")
