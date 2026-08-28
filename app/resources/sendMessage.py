@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class SendMessage(Resource):
 
     @authenticate()
-    @exception_handler()
+    # @exception_handler()
     def post(self, **kwargs):
         try:
             json_data = request.get_json(force=True)
@@ -27,43 +27,46 @@ class SendMessage(Resource):
             raise e
 
     @classmethod
-    @exception_handler()
+    # @exception_handler()
     def send_message_to_bot(cls, message, thread_id=None, **kwargs):
+        try:
+            user_id = kwargs.get('user_id')
 
-        user_id = kwargs.get('user_id')
+            if not message:
+                return responsify(has_error= True, errors= "message is required.")
 
-        if not message:
-            return responsify(has_error= True, errors= "message is required.")
+            if not thread_id:
+                thread_id = uuid.uuid4().hex
 
-        if not thread_id:
-            thread_id = uuid.uuid4().hex
+                created = user_thread_create(user_id, thread_id)
+                if not created:
+                    return responsify(has_error=True, errors="Thread creation failed, try again.")
 
-            created = user_thread_create(user_id, thread_id)
-            if not created:
-                return responsify(has_error=True, errors="Thread creation failed, try again.")
+            message_dict = {
+                "thread_id": thread_id,
+                "role": "user",
+                "msg": message
+            }
 
-        message_dict = {
-            "thread_id": thread_id,
-            "role": "user",
-            "msg": message
-        }
+            message_insert = chat_message_insert_one(message_dict)
+            if not message_insert:
+                return responsify(has_error=True, errors="Problem in storing human message.")
 
-        message_insert = chat_message_insert_one(message_dict)
-        if not message_insert:
-            return responsify(has_error=True, errors="Problem in storing human message.")
+            logger.error(f"human message is here: {message}")
 
-        logger.error(f"human message is here: {message}")
+            ai_response = chatbot.invoke({"thread_id": thread_id, "question": message})
+            logger.error(f"AI response got API: {ai_response}")
 
-        ai_response = chatbot.invoke({"thread_id": thread_id, "question": message})
-        logger.error(f"AI response got API: {ai_response}")
+            answer = ai_response.get('response')
 
-        answer = ai_response.get('response')
+            message_dict['role'] = "bot"
+            message_dict['msg'] = answer
 
-        message_dict['role'] = "bot"
-        message_dict['msg'] = answer
+            message_insert = chat_message_insert_one(message_dict)
+            if not message_insert:
+                return responsify(has_error=True, errors="Problem in storing ai message.")
 
-        message_insert = chat_message_insert_one(message_dict)
-        if not message_insert:
-            return responsify(has_error=True, errors="Problem in storing ai message.")
+            return thread_id, answer
 
-        return thread_id, answer
+        except Exception as e:
+            raise e
