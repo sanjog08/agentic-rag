@@ -16,12 +16,11 @@ def chat_message_insert_one(message_dict=None):
         thread_id = message_dict.get('thread_id')
         role = message_dict.get('role')
         msg = message_dict.get('msg')
-        create_at = datetime.now()
-                        
-        query = "INSERT INTO chat_message (thread_id, role, msg, create_at) VALUES (?, ?, ?, ?)"
+
+        query = "INSERT INTO chat_messages (thread_id, role, msg) VALUES (?, ?, ?)"
 
         conn = turso_conn()
-        conn.execute(query, (thread_id, role, msg, create_at))
+        conn.execute(query, (thread_id, role, msg))
         conn.commit()
 
         conn.close()
