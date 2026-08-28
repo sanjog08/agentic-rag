@@ -1,5 +1,9 @@
 from app.graph.nodes import *
 from app.models.chatMessages import get_all_chat_message
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def load_history(state: RagState) -> RagState:
 
@@ -12,11 +16,12 @@ def load_history(state: RagState) -> RagState:
 
     # need to load the chat history
     for chat in chat_list:
-        if chat.role == "user":
-            message_list.append(HumanMessage(content=chat.msg))
-        elif chat.role == "ai":
-            message_list.append(AIMessage(content=chat.msg))
+        if chat[2] == "user":
+            message_list.append(HumanMessage(content=chat[3]))
+        elif chat[2] == "bot":
+            message_list.append(AIMessage(content=chat[3]))
         else:
-            return None
+            logger.warning(f"Unknown chat role: {chat[2]}")
+            continue
 
     return {'chat_history': message_list}

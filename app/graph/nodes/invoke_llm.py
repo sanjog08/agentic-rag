@@ -7,10 +7,15 @@ logger = logging.getLogger(__name__)
 
 
 def invoke_llm(state: RagState) -> RagState:
+    question = state["question"]
+    chat_history = state["chat_history"]
 
-    question = state['question']
+    messages = [
+        *chat_history,
+        HumanMessage(content=question)
+    ]
 
-    response = llm.invoke(question)
+    response = llm.invoke(messages)
     answer = response.content[0].get('text')
     logger.error(f"response generate by the llm: {answer}")
 
