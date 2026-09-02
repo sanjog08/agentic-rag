@@ -49,3 +49,20 @@ def user_threads_delete_single_user(user_id):
         return True
 
     return False
+
+
+def user_threads_check_threads(thread_id, user_id):
+    if thread_id and user_id:
+        query = "SELECT * FROM user_threads WHERE user_id = ? and thread_id = ?"
+
+        conn = turso_conn()
+        thread_exits = conn.execute(query, (user_id, thread_id))
+        thread_exits = thread_exits.fetchone()
+        conn.close()
+
+        if not thread_exits:
+            return False
+
+        return True
+
+    return False

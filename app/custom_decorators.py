@@ -3,6 +3,9 @@ from flask import request
 from datetime import  timedelta, datetime
 import jwt
 import json
+
+from jwt import InvalidSignatureError
+
 import config
 from app.custom_exception import *
 from app.exceptions.Exceptions import InvalidRequestError, InternalServerError
@@ -44,7 +47,11 @@ def authenticate():
                 return responsify(has_error=True, errors="JWT token is missing in request.")
 
             # decode the token
-            payload = jwt.decode(jwt_token, config.JWT_SECRET, algorithms=['HS256'])
+            try:
+                payload = jwt.decode(jwt_token, config.JWT_SECRET, algorithms=['HS256'])
+            except InvalidSignatureError as e:
+                err_msg = str(e)
+                return responsify(has_error=True, errors=err_msg)
             user_name = payload.get('name')
             user_email = user_id = payload.get('email')
             session_valid_till = payload.get('token_validity')
