@@ -10,7 +10,7 @@ class UserConversations(Resource):
 
     @authenticate()
     @exception_handler()
-    def post(self, **kwargs):
+    def get(self, **kwargs):
         user_id = kwargs.get('user_id')
         if not user_id:
             responsify(has_error=True, errors="Can't find threads for the logged in user")

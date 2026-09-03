@@ -12,10 +12,10 @@ class ConversationHistory(Resource):
 
     @authenticate()
     @exception_handler()
-    def post(self, **kwargs):
-        json_data = request.get_json(force=True)
+    def get(self, **kwargs):
+        args = request.args
 
-        thread_id = json_data.get('thread_id')
+        thread_id = args.get('thread_id')
         if not thread_id:
             return responsify(body= "thread_id not given in request.")
 
